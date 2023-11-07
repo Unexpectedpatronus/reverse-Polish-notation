@@ -13,18 +13,24 @@ private:
     };
 
     Node *topNode;
+    size_t size;
 
 public:
-    Stack() : topNode(nullptr) {}
+    Stack() : topNode(nullptr), size(0) {}
 
     bool is_empty() const {
         return topNode == nullptr;
+    }
+
+    size_t get_size() const {
+        return size;
     }
 
     void push(const T &value) {
         Node *newNode = new Node(value);
         newNode->previous = topNode;
         topNode = newNode;
+        size++;
     }
 
     void pop() {
@@ -34,7 +40,7 @@ public:
         Node *temp = topNode;
         topNode = topNode->previous;
         delete temp;
-
+        size--;
     }
 
     T top() const {
@@ -42,8 +48,6 @@ public:
             throw std::runtime_error("Stack is empty. No top element.");
         }
         return topNode->data;
-
-
     }
 
     void display_all() const {
@@ -77,6 +81,7 @@ public:
                 prevCopy = newNode;
                 temp = temp->previous;
             }
+            size = other.size;
         }
         return *this;
     }

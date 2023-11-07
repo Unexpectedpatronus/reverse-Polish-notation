@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdexcept>
 
 template<typename T>
 class Queue {
@@ -26,18 +27,17 @@ public:
         }
     }
 
-    size_t getSize() const {
+    size_t get_size() const {
         return size;
     }
 
-    bool isEmpty() const {
+    bool is_empty() const {
         return frontNode == nullptr;
     }
 
-
     void push(const T &val) {
         Node *newNode = new Node(val);
-        if (isEmpty()) {
+        if (is_empty()) {
             frontNode = rearNode = newNode;
         } else {
             rearNode->next = newNode;
@@ -47,9 +47,8 @@ public:
     }
 
     void pop() {
-        if (isEmpty()) {
-            std::cout << "Queue is empty. Cannot pop." << std::endl;
-            return;
+        if (is_empty()) {
+            throw std::runtime_error("Queue is empty. Can't pop.");
         }
         Node *temp = frontNode;
         frontNode = frontNode->next;
@@ -58,15 +57,16 @@ public:
     }
 
     T front() const {
-        if (isEmpty()) {
-            std::cout << "Queue is empty. No front element." << std::endl;
-            return T();
+        if (is_empty()) {
+            throw std::runtime_error("Queue is empty. No front element.");
         }
+        std::cout << "Front element: " << frontNode->data << std::endl;
         return frontNode->data;
     }
 
     void display_all() const {
         Node *current = frontNode;
+        std::cout << "In queue: ";
         while (current != nullptr) {
             std::cout << current->data << " ";
             current = current->next;
@@ -76,7 +76,7 @@ public:
 
 
     void clear() {
-        while (!isEmpty()) {
+        while (!is_empty()) {
             pop();
         }
     }

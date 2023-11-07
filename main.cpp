@@ -7,6 +7,7 @@
 #include "stack.cpp"
 #include "queue.cpp"
 
+
 std::map<std::string, int> operationPriority = {
         {"+",   1},
         {"-",   1},
@@ -53,7 +54,6 @@ void check_chars(std::string &chars, std::vector<std::string> &result) {
     }
 }
 
-
 std::vector<std::string> tokenization(const std::string &input) {
     std::vector<std::string> tokens;
     std::string digits, chars;
@@ -89,7 +89,7 @@ void print(const std::vector<std::string> &postfixTokens, const Stack<std::strin
     }
     std::cout << std::endl;
     operations.display_all();
-    std::cout << "-------------------------------------" << std::endl;
+    std::cout << "---------------------------------------" << std::endl;
 }
 
 std::vector<std::string> infix_to_postfix(const std::vector<std::string> &infixTokens) {
@@ -140,14 +140,72 @@ std::vector<std::string> infix_to_postfix(const std::vector<std::string> &infixT
     return postfixTokens;
 }
 
+double calculate(const std::vector<std::string> &postfixTokens) {
+    Stack<double> numbers;
+    for (const std::string &token: postfixTokens) {
+        if (is_digits(token)) {
+            numbers.push(std::stod(token));
+        } else {
+            double result = 0.0;
+            if (is_oper(token)) {
+                if (numbers.get_size() < 2) {
+                    throw std::runtime_error("Not enough operands for the operator: " + token);
+                }
+                double b = numbers.top();
+                numbers.pop();
+                double a = numbers.top();
+                numbers.pop();
+                if (token == "+")
+                    result = a + b;
+                else if (token == "-")
+                    result = a - b;
+                else if (token == "*")
+                    result = a * b;
+                else if (token == "/") {
+                    if (b == 0) {
+                        throw std::runtime_error("Division by zero.");
+                    }
+                    result = a / b;
+                } else if (token == "^")
+                    result = std::pow(a, b);
+            } else {
+                if (numbers.get_size() < 1) {
+                    throw std::runtime_error("Not enough operands for the operator: " + token);
+                }
+                double a = numbers.top();
+                numbers.pop();
+                if (token == "sin")
+                    result = std::sin(a);
+                else if (token == "cos")
+                    result = std::cos(a);
+                else if (token == "tan")
+                    result = std::tan(a);
+                else if (token == "ctg")
+                    result = 1.0 / std::tan(a);
+            }
+
+            numbers.push(result);
+        }
+    }
+
+    if (numbers.get_size() != 1) {
+        throw std::runtime_error("Invalid number of arguments in Stack.");
+    }
+
+    return numbers.top();
+}
+
+
 int main() {
-    std::string inputData = "3 + 4 * 2/cos(1 -5 ) ^2 ^ 3";
+    std::string inputData = "8/2-7/0";
     std::vector<std::string> tokens = tokenization(inputData);
     std::vector<std::string> postfixTokens = infix_to_postfix(tokens);
+    std::cout << "Reverse Polish: ";
     for (const std::string &token: postfixTokens) {
         std::cout << token << " ";
     }
     std::cout << std::endl;
+    std::cout << "Result: " << calculate(postfixTokens) << std::endl;
 
     return 0;
 }
