@@ -5,5 +5,4 @@ set(CMAKE_CXX_STANDARD 23)
 
 add_executable(Polish main.cpp
         stack.cpp
-        queue.cpp
 )
