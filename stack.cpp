@@ -18,6 +18,21 @@ private:
 public:
     Stack() : topNode(nullptr), size(0) {}
 
+    Stack(const Stack &other) : topNode(nullptr), size(other.size) {
+        Node *temp = other.topNode;
+        Node *prevCopy = nullptr;
+        while (temp) {
+            Node *newNode = new Node(temp->data);
+            if (!prevCopy) {
+                topNode = newNode;
+            } else {
+                prevCopy->previous = newNode;
+            }
+            prevCopy = newNode;
+            temp = temp->previous;
+        }
+    }
+
     bool is_empty() const {
         return topNode == nullptr;
     }

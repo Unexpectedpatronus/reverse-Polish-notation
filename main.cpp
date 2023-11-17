@@ -36,7 +36,7 @@ bool is_digits(const std::string &str) {
 }
 
 bool find_x(const std::vector<std::string> &data) {
-    for (const auto &token: data)
+    for (const std::string &token: data)
         if (token == "x")
             return true;
     return false;
@@ -132,6 +132,9 @@ std::vector<std::string> infix_to_postfix(const std::vector<std::string> &infixT
         } else if (token == "(") {
             operatorStack.push(token);
         } else if (token == ")") {
+            if (operatorStack.is_empty()) {
+                throw std::runtime_error("There are mismatched parentheses.");
+            }
             while (operatorStack.top() != "(") {
                 if (operatorStack.is_empty()) {
                     throw std::runtime_error("There are mismatched parentheses.");
@@ -139,10 +142,10 @@ std::vector<std::string> infix_to_postfix(const std::vector<std::string> &infixT
                 postfixTokens.push_back(operatorStack.top());
                 operatorStack.pop();
             }
-            if (operatorStack.top() == "(") {
+            if (!operatorStack.is_empty() && operatorStack.top() == "(") {
                 operatorStack.pop();
             }
-            if (is_func(operatorStack.top())) {
+            if (!operatorStack.is_empty() && is_func(operatorStack.top())) {
                 postfixTokens.push_back(operatorStack.top());
                 operatorStack.pop();
             }
@@ -163,24 +166,24 @@ std::vector<std::string> infix_to_postfix(const std::vector<std::string> &infixT
 }
 
 double calculate(const std::vector<std::string> &postfixTokens) {
-    Stack<double> numbers;
+    Stack<double> numberStack;
 
     for (const std::string &token: postfixTokens) {
         if (is_digits(token)) {
-            numbers.push(std::stod(token));
+            numberStack.push(std::stod(token));
         } else {
             double result = 0;
 
             try {
                 if (is_oper(token)) {
-                    if (numbers.get_size() < 2) {
+                    if (numberStack.get_size() < 2) {
                         throw std::runtime_error("Not enough operands for the operator: " + token);
                     }
 
-                    double b = numbers.top();
-                    numbers.pop();
-                    double a = numbers.top();
-                    numbers.pop();
+                    double b = numberStack.top();
+                    numberStack.pop();
+                    double a = numberStack.top();
+                    numberStack.pop();
 
                     if (token == "+")
                         result = a + b;
@@ -193,12 +196,12 @@ double calculate(const std::vector<std::string> &postfixTokens) {
                     } else if (token == "^")
                         result = std::pow(a, b);
                 } else {
-                    if (numbers.get_size() < 1) {
+                    if (numberStack.get_size() < 1) {
                         throw std::runtime_error("Not enough operands for the operator: " + token);
                     }
 
-                    double a = numbers.top();
-                    numbers.pop();
+                    double a = numberStack.top();
+                    numberStack.pop();
 
                     if (token == "sin")
                         result = std::sin(a);
@@ -207,22 +210,22 @@ double calculate(const std::vector<std::string> &postfixTokens) {
                     else if (token == "tan")
                         result = std::tan(a);
                     else if (token == "ctg")
-                        result = 1 / std::tan(a);
+                        result = std::cos(a) / std::sin(a);
                 }
             } catch (const std::invalid_argument &ex) {
                 std::cerr << ex.what() << std::endl;
                 return 1;
             }
 
-            numbers.push(result);
+            numberStack.push(result);
         }
     }
 
-    if (numbers.get_size() != 1) {
+    if (numberStack.get_size() != 1) {
         throw std::runtime_error("Invalid number of arguments in Stack.");
     }
 
-    return numbers.top();
+    return numberStack.top();
 }
 
 int main() {
@@ -230,7 +233,14 @@ int main() {
     std::cout << "Enter a mathematical expression:" << std::endl;
     std::cin >> inputData;
 
-//    std::string inputData = "2.5 + 3 / x";
+//    std::string inputData1 = ")1(";
+//    std::string inputData2 = "(1) + (8";
+//    std::string inputData3 = "(1) + (9))";
+//    std::string inputData4 = "(-1)";
+//    std::string inputData5 = "-(-(-(x)))";
+//    std::string inputData6 = "-(-(-x))";
+//    std::string inputData7 = ")";
+
     std::vector<std::string> tokens = tokenization(inputData);
     std::vector<std::string> postfixTokens = infix_to_postfix(tokens);
 
